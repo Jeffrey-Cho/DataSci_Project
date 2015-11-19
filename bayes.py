@@ -1,9 +1,52 @@
 from numpy import *
 import re
 
-DEBUG = False
-TEST_MODE = True
-MI_THRESH_HOLD = 2.5
+DEBUG = True
+TEST_MODE = False
+MI_THRESH_HOLD = 2.48 # 536 feature (total 4206)
+LAMDA = 0.1
+HIGHMILIST = ['software', \
+'update', \
+'replace', \
+'module', \
+'sensor', \
+'ecm', \
+'control', \
+'facilities', \
+'upload', \
+'calibration', \
+'flames', \
+'condensation', \
+'authorized', \
+'burn', \
+'westport', \
+'freeze', \
+'reprogram', \
+'induce', \
+'elevated', \
+'weather', \
+'temperatures', \
+'interfere', \
+'manifold', \
+'operation', \
+'intake', \
+'cold', \
+'pipe', \
+'conditions', \
+'improper', \
+'person', \
+'inspect', \
+'wesport', \
+'proper', \
+'isl', \
+'cummins', \
+'input', \
+'signal', \
+'unit', \
+'exhaust', \
+'engines', \
+'programming', \
+'isx']
 
 """
 Remove stop word from input string
@@ -33,6 +76,8 @@ def rmStopWord(string):
     string = re.sub('sensors', 'sensor', string)
     string = re.sub('lights', 'light', string)
     string = re.sub('wheels', 'wheel', string)
+    string = re.sub('bags', 'airbag', string)
+    string = re.sub('air bag', 'airbag', string)
 
     stopwordfile.close()
 
@@ -102,7 +147,10 @@ def setOfWords2Vec(vocabList, inputSet):
     returnVec = [0]*len(vocabList)
     for word in inputSet:
         if word in vocabList:
-            returnVec[vocabList.index(word)] = 1
+            if word in HIGHMILIST:
+                returnVec[vocabList.index(word)] = 2
+            else:
+                returnVec[vocabList.index(word)] = 1
         #else:
             #print "the word %s is not in my vocabulary" % word
     return returnVec
@@ -144,6 +192,10 @@ def trainNB0(trainMatrix, trainCategory):
 def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
     p1 = sum(vec2Classify * p1Vec) + log(pClass1)
     p0 = sum(vec2Classify * p0Vec) + log(1.0 - pClass1)
+    # if p1 > LAMDA:
+    #     return 1
+    # else:
+    #     return 0
     if p1 > p0:
         return 1
     else:
@@ -193,6 +245,13 @@ def calculateMI(vocabList, trainMatrix, trainCategory):
 
     pWordVect = (p1Num + p0Num) / float(numTrainDocs)   # probability P(word)
 
+    #p11Vect = p1Num / p1Denom                 # probability P(word = 1, category = Software)
+    #p00Vect = p0Num / p0Denom                 # probability P(word = 1, category = non-Software)
+    #p01Vect = ones(numWords) - p11Vect      # probability P(word = 0, category = Software)
+    #p10Vect = ones(numWords) - p00Vect      # probability P(word = 0, category = non-Software)
+
+    #pWordVect = (p1Num + p0Num) / float(p1Denom+p0Denom)   # probability P(word)
+
     # logBaseSwVect = p11Vect/(pWordVect*pSoftware)
     # logBaseSwVect2 = p01Vect/((ones(numWords)-pWordVect)*pSoftware)
     # logBasenonSwVect = p10Vect/((ones(numWords)-pWordVect)*(1-pSoftware))
@@ -241,8 +300,8 @@ def debugPrint(string):
 Main function
 """
 def run():
-    trainingString = open('./a.txt').read()
-    predictionString = open('./b.txt').read()
+    trainingString = open('./FLAT_RCL_Out_14.txt').read()
+    predictionString = open('./FLAT_RCL_Out_15.txt').read()
 
     trainingString = rmStopWord(trainingString)
     predictionString = rmStopWord(predictionString)
@@ -290,12 +349,12 @@ def run():
     str = ""
     newvocabList = []
 
-    # make new vocabList based on MI value over 2.7
+    # make new vocabList based on MI value
     for index in range(len(vocabList)):
         str += vocabList[index] + '\t' + "%.10f" % miVect[index] + '\n'
         if miVect[index] > MI_THRESH_HOLD:
             newvocabList.append(vocabList[index])
-
+    newvocabList.append('software')     # modification to prevent log calculation on weight value
     debugWrite(str)
 
     trainingSet = range(totalNo)
