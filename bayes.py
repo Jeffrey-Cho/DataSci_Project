@@ -1,10 +1,9 @@
 from numpy import *
 import re
 
-DEBUG = True
+DEBUG = False
 TEST_MODE = False
 MI_THRESH_HOLD = 2.48 # 536 feature (total 4206)
-LAMDA = 0.1
 HIGHMILIST = ['software', \
 'update', \
 'replace', \
@@ -76,8 +75,6 @@ def rmStopWord(string):
     string = re.sub('sensors', 'sensor', string)
     string = re.sub('lights', 'light', string)
     string = re.sub('wheels', 'wheel', string)
-    string = re.sub('bags', 'airbag', string)
-    string = re.sub('air bag', 'airbag', string)
 
     stopwordfile.close()
 
@@ -192,10 +189,7 @@ def trainNB0(trainMatrix, trainCategory):
 def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
     p1 = sum(vec2Classify * p1Vec) + log(pClass1)
     p0 = sum(vec2Classify * p0Vec) + log(1.0 - pClass1)
-    # if p1 > LAMDA:
-    #     return 1
-    # else:
-    #     return 0
+
     if p1 > p0:
         return 1
     else:
@@ -244,40 +238,6 @@ def calculateMI(vocabList, trainMatrix, trainCategory):
     p10Vect = ones(numWords) - p00Vect      # probability P(word = 0, category = non-Software)
 
     pWordVect = (p1Num + p0Num) / float(numTrainDocs)   # probability P(word)
-
-    #p11Vect = p1Num / p1Denom                 # probability P(word = 1, category = Software)
-    #p00Vect = p0Num / p0Denom                 # probability P(word = 1, category = non-Software)
-    #p01Vect = ones(numWords) - p11Vect      # probability P(word = 0, category = Software)
-    #p10Vect = ones(numWords) - p00Vect      # probability P(word = 0, category = non-Software)
-
-    #pWordVect = (p1Num + p0Num) / float(p1Denom+p0Denom)   # probability P(word)
-
-    # logBaseSwVect = p11Vect/(pWordVect*pSoftware)
-    # logBaseSwVect2 = p01Vect/((ones(numWords)-pWordVect)*pSoftware)
-    # logBasenonSwVect = p10Vect/((ones(numWords)-pWordVect)*(1-pSoftware))
-    # logBasenonSwVect2 = p00Vect/(pWordVect*(1-pSoftware))
-
-    #debugging
-    # for i in range(numWords):
-    #     if isnan(log(logBaseSwVect[i])):
-    #         print 'first'
-    #         print vocabList[i]
-    #         print logBaseSwVect[i]
-    #     if isnan(log(logBaseSwVect2[i])):
-    #         print 'second'
-    #         print vocabList[i]
-    #         print logBaseSwVect2[i]
-    #         print p01Vect[i]
-    #         print (ones(numWords)-pWordVect)[i]*pSoftware
-    #     if isnan(log(logBasenonSwVect[i])):
-    #         print 'third'
-    #         print vocabList[i]
-    #         print logBasenonSwVect[i]
-    #     if isnan(log(logBasenonSwVect2[i])):
-    #         print 'forth'
-    #         print vocabList[i]
-    #         print logBasenonSwVect2[i]
-
 
     miVect = p11Vect*log(p11Vect/(pWordVect*pSoftware)) + \
     p01Vect*log(p01Vect/((ones(numWords)-pWordVect)*pSoftware)) + \
