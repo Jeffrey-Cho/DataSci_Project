@@ -10,6 +10,6 @@ preprocessing: Tokenizing and classify sw and non-sw document<br>
 Usage:
 
 > import bayes<br>
-> bayes.Test()
+> bayes.run()
 
 
