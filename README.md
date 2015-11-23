@@ -1,11 +1,11 @@
 DataSci_Project
 ===============
-2015 Fall Data Science Term Project 
+2015 Fall Data Science Term Project <br>
 Team: Metalicus 
 
 File Description
 -----------------
-Input File:
+Input File:<br>
 FLAT_RCL_Out_14.txt: traing data file<br>
 FLAT_RCL_Out_15.txt: prediction data file<br>
 stopwords_long.txt: stop word list for unnecessary words<br>
@@ -13,10 +13,10 @@ stopwords_long.txt: stop word list for unnecessary words<br>
 2014RecallNo_Software.csv: classification data of 2014 year<br>
 2014RecallNo_nonSoftware.csv: classification data of 2014 year<br>
 
-Main File:
+Main File:<br>
 bayes.py: main python file that skeleton code come from "Machin Learing in Action written by Peter Harrington, Chapter 4"<br>
 
-Output File:
+Output File:<br>
 predictionResult.txt
 
 
@@ -24,7 +24,7 @@ Usage
 -------
 
 Run python in your console, and 
-> import bayes
+> import bayes <br>
 > bayes.run()
 
 
